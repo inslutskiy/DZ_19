@@ -2,7 +2,7 @@ import java.io.File;
 import java.util.Scanner;
 
 public class Main {
-    static File saveFile = new File("basket.txt");
+    static File saveFile = new File("basket.bin");
     public static void main(String[] args) throws Exception{
         Scanner scanner = new Scanner(System.in);
 

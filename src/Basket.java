@@ -3,7 +3,9 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
-public class Basket {
+public class Basket implements Serializable{
+    @Serial
+    private static  final long serialVersionUID = 1L;
     private String[] name;
     private int[] prise;
     private int[] amount;
@@ -40,51 +42,21 @@ public class Basket {
         }
     }
 
-    public static Basket loadFile(File textFile) throws IOException {
-        Basket basket = new Basket();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(textFile))) {
-            String goodsStr = bufferedReader.readLine();
-            String pricesStr = bufferedReader.readLine();
-            String quantitiesStr = bufferedReader.readLine();
-
-            basket.name = goodsStr.split(" ");
-
-            basket.prise = Arrays.stream(pricesStr.split(" "))
-                    .map(Integer::parseInt)
-                    .mapToInt(Integer::intValue)
-                    .toArray();
-
-            basket.amount = Arrays.stream(quantitiesStr.split(" "))
-                    .map(Integer::parseInt)
-                    .mapToInt(Integer::intValue)
-                    .toArray();
-
-            basket.totalPrise = Arrays.stream(quantitiesStr.split(" "))
-                    .map(Integer::parseInt)
-                    .mapToLong(Integer::longValue)
-                    .toArray();
-
-        } catch (FileNotFoundException e) {
+    public static Basket loadFile(File file) {
+        Basket basket = null;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            basket = (Basket) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
         return basket;
     }
 
-    public void saveFile(File textFile) throws FileNotFoundException {
-        try (PrintWriter out = new PrintWriter(textFile)) {
-            out.println(String.join( " ", name));
-
-            out.println(String.join(" ", Arrays.stream(prise)
-                    .mapToObj(String::valueOf)
-                    .toArray(String []::new)));
-
-            out.println(String.join(" ", Arrays.stream(amount)
-                    .mapToObj(String::valueOf)
-                    .toArray(String []::new)));
-
-            out.println(String.join(" ", Arrays.stream(totalPrise)
-                    .mapToObj(String::valueOf)
-                    .toArray(String []::new)));
+    public void saveFile(File file) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+            oos.writeObject(this);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
